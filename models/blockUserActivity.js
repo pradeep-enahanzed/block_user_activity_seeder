@@ -9,8 +9,6 @@ const blockUserActivitySchema = new Schema(
     cohort_id: { type: ObjectId, ref: "Cohort" },
 
     mcq_option_ids: { type: Array },
-    response_id: { type: ObjectId, ref: "fills._id" },
-    response_text: { type: String },
     response_type: {
       type: String,
       enum: ["text", "audio", "video", "canvas", "file"],
@@ -26,6 +24,9 @@ const blockUserActivitySchema = new Schema(
 );
 
 module.exports = mongoose.model(
-  "block_user_activities_new_2",
+  "blockuseractivities_new_2",
   blockUserActivitySchema
 );
+
+// audio,video,file -> attachment
+// canvas -> art

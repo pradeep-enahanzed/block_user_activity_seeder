@@ -50,4 +50,7 @@ const UserCourseActivitySchema = new mongoose.Schema({
     type: Date,
   },
 });
-module.exports = mongoose.model("UserCourseActivity", UserCourseActivitySchema);
+module.exports = mongoose.model(
+  "user_course_activities_v2",
+  UserCourseActivitySchema
+);

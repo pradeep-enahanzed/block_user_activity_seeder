@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "data:import": "node seeder.js -i"
+    "data:import": "node seeder.js -i",
+    "seedFills": "node fills_seeder.js -i",
+    "seedTexts": "node text_seeder.js -i",
+    "seedFiles": "node file_seeder.js -i",
+    "seedMatches": "node match_seeder.js -i"
   },
   "keywords": [],
   "author": "",

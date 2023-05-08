@@ -10,36 +10,39 @@ mongoose.connect(process.env.MONGO_URI, (err) => {
 // Loads models
 const BlockUserActivity = require("./models/blockUserActivity");
 const blocks = require("./models/blocks");
-// const UserCourseActivity = require("./models/userCourseActivity");
+const UserCourseActivity = require("./models/userCourseActivity");
 
 // Creates default cohorts for each course.
 const BlockUserActivityCollection = async () => {
   try {
     // Use the Aggregation Pipeline to transform the data in the original collection to match the new schema
     const blocksCollectionPipeline = [
-      { $match: { type: { $eq: "mcq" } } },
+      { $match: { type: { $eq: "fill" } } },
       {
         $project: {
           // Transform fields from old schema to new schema
           _id: 0,
           block_id: "$_id",
           course_id: "$course",
-          mcqs: "$mcqs",
+          fills: "$fills",
         },
       },
       {
-        $unwind: "$mcqs",
+        $unwind: "$fills",
       },
       {
-        $unwind: "$mcqs.voters",
+        $unwind: "$fills.responses",
       },
       {
         $project: {
           // Transform fields from old schema to new schema
-          mcq_option_id: "$mcqs._id",
-          user_id: "$mcqs.voters",
+          fills: "$fills._id",
+          user_id: "$fills.responses.creator",
+          text: "$fills.responses.text",
           block_id: "$block_id",
           course_id: "$course_id",
+          created_at: "$fills.responses.created_at",
+          updated_at: "$fills.responses.updated_at",
         },
       },
       {
@@ -49,8 +52,14 @@ const BlockUserActivityCollection = async () => {
             course_id: "$course_id",
             block_id: "$block_id",
           },
-          mcq_option_id: {
-            $push: "$mcq_option_id",
+          fills: {
+            $push: { _id: "$fills", text: "$text" },
+          },
+          timestamps: {
+            $push: {
+              created_at: "$created_at",
+              updated_at: "$updated_at",
+            },
           },
         },
       },
@@ -58,30 +67,30 @@ const BlockUserActivityCollection = async () => {
         $project: {
           // Transform fields from old schema to new schema
           _id: 0,
-          mcq_option_ids: "$mcq_option_id",
+          fills: "$fills",
           user_id: "$_id.user_id",
           block_id: "$_id.block_id",
           course_id: "$_id.course_id",
-          type: "mcq",
-          created_at: new Date("2022-12-31"),
-          updated_at: new Date("2022-12-31"),
+          type: "fill",
+          created_at: { $arrayElemAt: ["$timestamps.created_at", 0] },
+          updated_at: { $arrayElemAt: ["$timestamps.updated_at", 0] },
         },
       },
+
       {
         $set: {
           NoOfAttempts: 1,
         },
       },
       {
-        $unset: ["mcqs"],
-      },
-      {
-        $out: "blockuseractivities",
+        $merge: {
+          into: "blockuseractivities",
+        },
       },
     ];
 
     // first creating default cohorts for all the courses.
-    const mcqData = await blocks.aggregate(blocksCollectionPipeline,  {
+    const mcqData = await blocks.aggregate(blocksCollectionPipeline, {
       "allowDiskUse" : true
   });
     console.log("Data Imported...", mcqData);
@@ -95,7 +104,7 @@ const BlockUserActivityCollection = async () => {
 // Delete data
 const deleteData = async () => {
   try {
-    const res = await BlockUserActivity.deleteMany();
+    const res = await UserCourseActivity.deleteMany();
     console.log(res);
     console.log("Data Destroyed...");
     process.exit();
