@@ -70,6 +70,7 @@ const BlockUserActivityCollection = async () => {
       {
         $set: {
           NoOfAttempts: 1,
+          migrated: 1
         },
       },
       {

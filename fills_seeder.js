@@ -53,7 +53,7 @@ const BlockUserActivityCollection = async () => {
             block_id: "$block_id",
           },
           fills: {
-            $push: { _id: "$fills", text: "$text" },
+            $push: { _id: "$fills", value: "$text" },
           },
           timestamps: {
             $push: {
@@ -71,7 +71,7 @@ const BlockUserActivityCollection = async () => {
           user_id: "$_id.user_id",
           block_id: "$_id.block_id",
           course_id: "$_id.course_id",
-          type: "fill",
+          type: "fills",
           created_at: { $arrayElemAt: ["$timestamps.created_at", 0] },
           updated_at: { $arrayElemAt: ["$timestamps.updated_at", 0] },
         },
@@ -80,6 +80,7 @@ const BlockUserActivityCollection = async () => {
       {
         $set: {
           NoOfAttempts: 1,
+          migrated: 1
         },
       },
       {

@@ -24,7 +24,7 @@ const blockUserActivitySchema = new Schema(
 );
 
 module.exports = mongoose.model(
-  "blockuseractivities_new_2",
+  "blockuseractivities",
   blockUserActivitySchema
 );
 
